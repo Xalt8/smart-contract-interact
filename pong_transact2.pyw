@@ -2,7 +2,7 @@ from listner import pingpong_contract, web3, creds
 from data_script import get_first_unPonged, update_pongStatus, get_last_ponged
 import time
 import threading
-import asyncio
+
 
 def build_transaction(nonce:int,  pingHash:str) -> dict:
     ''' Helper function that returns a trsnaction dictionary'''
@@ -60,18 +60,18 @@ def account_balance() -> bool:
     return False
 
 
-# async def send_transaction(signed_tx) -> str:
-#     for _ in range(100):
-#         try:
-#             tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-#             return tx_hash
-#         except ValueError as e:
-#             print("Send transaction error")
-#             print(e)
-#             asyncio.sleep(300)
+# def send_transaction(signed_tx):
+#     ''' Takes a signed transaction object and returns a transaction hash'''   
+#     try:
+#         tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+#         print("Sent raw transaction")
+#         return tx_hash
+#     except ValueError as e:
+#         print("Couldn't send the transaction. Error:")
+#         print(e)
+#         return
 
-
-async def pong_transact() -> tuple:
+def pong_transact() -> tuple:
     
     assert account_balance(), "Insufficient account balance"
     print(f"\nAccount balance -> okay")
@@ -85,7 +85,6 @@ async def pong_transact() -> tuple:
     signed_tx = web3.eth.account.sign_transaction(build_tx, creds['PRIVATE_KEY'])
     print("signed transaction")
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-    # tx_hash = await send_transaction(signed_tx)
     print("Sent transaction")
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=240)
     if tx_receipt.status == 1:
