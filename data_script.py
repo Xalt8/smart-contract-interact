@@ -68,17 +68,17 @@ def get_first_unPonged() -> tuple:
         first instance where PongStatus is 'No Pong' 
         ============================================
         Checks to see if there are any entries in the CSV 
-        then if there are any 'No Pong' instances if not
-        waits 2 minutes and re-checks '''
+        Checks for any 'No Pong' entries if none
+        waits 5 minutes and re-checks '''
 
-    for _ in range(20):
+    for _ in range(50):
         pd_df = pd.read_csv('ping_data.csv')
         if (pd_df.shape[0] > 0) and (any(pd_df['PongStatus'] == "No Pong")):
             index = pd_df.loc[pd_df['PongStatus'] == "No Pong"].head(1).index[0]
             tx_hash = pd_df.iloc[index]['transactionHash']
             return (int(float(index)), tx_hash)
         else:
-            time.sleep(120)
+            time.sleep(300)
 
 
 @wait_for_lock

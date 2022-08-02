@@ -2,7 +2,7 @@ from listner import pingpong_contract, web3, creds
 from data_script import get_first_unPonged, update_pongStatus, get_last_ponged
 import time
 import threading
-import asyncio
+
 
 def build_transaction(nonce:int,  pingHash:str) -> dict:
     ''' Helper function that returns a trsnaction dictionary'''
@@ -22,9 +22,11 @@ def build_transaction(nonce:int,  pingHash:str) -> dict:
 
 
 def get_nonce()-> int:
-    ''' Returns the max of:
+    ''' Returns the max nonce of:
         - transaction count from wallet 
-        - nonce from the last trasaction hash in database '''
+        - nonce from the last trasaction hash in database 
+        Checks to see if the max nonce is higher than the nonce in 
+        database if not increment the nonce'''
 
     global creds, web3
     tx_count_wallet = web3.eth.get_transaction_count(creds['METAMASK_ADDRESS'])
@@ -33,7 +35,7 @@ def get_nonce()-> int:
     else:
         _,_, last_tx_hash, last_db_nonce = get_last_ponged()
 
-        for i in range(10):
+        for i in range(50):
             try:
                 last_tx = web3.eth.get_transaction(last_tx_hash)
             except:
@@ -56,44 +58,23 @@ def account_balance() -> bool:
             return True
         else:
             print("Top-up account balance")
-            time.sleep(300)
+            time.sleep(900)
     return False
 
 
-# async def send_transaction(signed_tx) -> str:
-#     for _ in range(100):
-#         try:
-#             tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-#             return tx_hash
-#         except ValueError as e:
-#             print("Send transaction error")
-#             print(e)
-#             asyncio.sleep(300)
 
-
-async def pong_transact() -> tuple:
+def pong_transact() -> tuple:
     
     assert account_balance(), "Insufficient account balance"
-    print(f"\nAccount balance -> okay")
     _nonce = get_nonce()
-    print(f"Nonce -> {_nonce}")
     _index, ping_hash = get_first_unPonged()
-    print(f"Got entry with {_index} index")
     build_tx = build_transaction(nonce=_nonce, pingHash=ping_hash)
     assert build_tx, "No transaction was built"
-    print("Transaction built")
     signed_tx = web3.eth.account.sign_transaction(build_tx, creds['PRIVATE_KEY'])
-    print("signed transaction")
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-    # tx_hash = await send_transaction(signed_tx)
-    print("Sent transaction")
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=240)
     if tx_receipt.status == 1:
-        print("Recieved reciept")
         update_pongStatus(index=_index, tx_hash=tx_hash.hex(), nonce=_nonce)
-        result_available.set()
-    else:
-        print("No transaction receipt - something went wrong")
         result_available.set()
     
 
