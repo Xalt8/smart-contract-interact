@@ -24,7 +24,6 @@ def get_blockNum_transHash(start_block:int) -> list[tuple]:
         of all events from the start_block parameter till the latest block
         Prints message if no entries where found '''
     global pingpong_contract
-    # event_filter = web3.eth.filter({"address": pingpong_address, 'fromBlock':start_block, 'toBlock':'latest'})
     event_filter = pingpong_contract.events.Ping.createFilter(fromBlock=start_block, toBlock='latest')
     entries = event_filter.get_all_entries()
     if entries:
@@ -42,7 +41,6 @@ def main(start_block):
     while True:
         time.sleep(300) # wait 5 minutes
         if get_last_entry():
-            # last_blockNumber,_,_,_ = get_last_entry()
             last_blockNumber = get_last_entry()[0]
             entries = get_blockNum_transHash(int(last_blockNumber))
             for entry in entries:
@@ -53,6 +51,6 @@ def main(start_block):
 if __name__ == '__main__':
     
     print('Connected to Infura') if web3.isConnected() else print('Not connected to Infura')
-    main(start_block=33045829)
+    main(start_block=33063450)
 
 

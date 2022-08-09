@@ -51,6 +51,6 @@ def main(start_block):
 if __name__ == '__main__':
     
     print('Connected to Infura') if web3.isConnected() else print('Not connected to Infura')
-    main(start_block=33045829)
+    main(start_block=33063450)
 
 
